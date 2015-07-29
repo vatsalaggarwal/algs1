@@ -1,4 +1,4 @@
-//package Week1;
+package Week1;
 // is TileNumber needed?
 //is there a way to control arguments for all functions? How did I
 //add 1 to all?

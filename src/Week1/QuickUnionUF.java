@@ -1,12 +1,12 @@
 package Week1;
 
-public class QuickFind {
+public class QuickUnionUF {
 
 	private int idLength;
 	private int[] id;
 	
 	
-	public QuickFind(int n)
+	public QuickUnionUF(int n)
 	{
 		idLength = n;
 		for(int i=0;i<n;i++)
@@ -25,7 +25,7 @@ public class QuickFind {
 		}
 	}
 
-	public boolean isConnected(int a, int b)
+	public boolean connected(int a, int b)
 	{
 		return id[a]==id[b];
 	}
