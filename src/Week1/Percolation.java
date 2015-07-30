@@ -3,16 +3,17 @@ package Week1;
 //is there a way to control arguments for all functions? How did I
 //add 1 to all?
 public class Percolation {
-	class square
+	
+	private class Square
 	{
 		private boolean isOpen;
 		private int tileNumber, row, column;
-		public square(int row, int column)
+		public Square(int i, int j)
 		{
-			tileNumber = (row-1)+(column-1)*8+1;
+			tileNumber = i+j*dim+1;
 			// makes it 1 2 3 4 5 6 7 8 column down, then 9 10 next column down etc
-			this.row=row;
-			this.column=column;
+			row=i;
+			column=j;
 		}
 		
 		public boolean isOpen()
@@ -22,22 +23,22 @@ public class Percolation {
 		
 		public boolean leftEdge()
 		{
-			return row>0;
+			return row == 0;
 		}
 		
-		public boolean rightEdge(int dim)
+		public boolean rightEdge()
 		{
-			return row<dim;
+			return row == dim - 1;
 		}
 		
 		public boolean topEdge()
 		{
-			return column>0;
+			return column == 0;
 		}
 		
-		public boolean bottomEdge(int dim)
+		public boolean bottomEdge()
 		{
-			return column<dim;
+			return column == dim - 1;
 		}
 		
 		
@@ -49,7 +50,7 @@ public class Percolation {
 		
 		public void setClose()
 		{
-			isOpen=false;
+			isOpen = false;
 		}
 		
 		public int tileNumber()
@@ -57,18 +58,18 @@ public class Percolation {
 			return tileNumber;
 		}
 	}
-	private square[][] grid;
+	private Square[][] grid;
 	private QuickUnionUF nodes;
 	private int dim;
 
 	public Percolation(int n)
 	{
-		grid = new square[n][n];
-		dim=n;
+		grid = new Square[n][n];
+		dim = n;
 		
-		for (int i=1;i<=n;i++)
-			for(int j=1;j<=n;j++)
-				grid[i][j]=new square(i,j); 
+		for (int i = 0; i < n; i++)
+			for(int j = 0; j < n; j++)
+				grid[i][j] = new Square(i,j); 
 		
 		nodes = new QuickUnionUF(n*n+2);
 		connectEnds();
@@ -88,48 +89,58 @@ public class Percolation {
 
 	public void open(int row, int column)
 	{
-		if(!isOpen(row, column))
-		{
 		int i = row - 1, j = column - 1;
+		if (!isOpen(i+1, j+1))
+		{
 		grid[i][j].setOpen();
-		if(!grid[i][j].leftEdge())
+		if (!grid[i][j].leftEdge())
 		{
 			grid[i-1][j].setOpen();
-			nodes.union(grid[i][j].tileNumber(),grid[i-1][j].tileNumber());
+			nodes.union(grid[i][j].tileNumber(), grid[i-1][j].tileNumber());
 		}
-		if(!grid[i][j].rightEdge(dim))
+		if (!grid[i][j].rightEdge())
 		{
 			grid[i+1][j].setOpen();
-			nodes.union(grid[i][j].tileNumber(),grid[i+1][j].tileNumber());
+			nodes.union(grid[i][j].tileNumber(), grid[i+1][j].tileNumber());
 		}
-		if(!grid[i][j].topEdge())
+		if (!grid[i][j].topEdge())
 		{
 			grid[i][j-1].setOpen();
-			nodes.union(grid[i][j].tileNumber(),grid[i][j-1].tileNumber());
+			nodes.union(grid[i][j].tileNumber(), grid[i][j-1].tileNumber());
 		}
-		if(!grid[i][j].bottomEdge(dim))
+		if (!grid[i][j].bottomEdge())
 		{
 			grid[i][j+1].setOpen();
-			nodes.union(grid[i][j].tileNumber(),grid[i][j+1].tileNumber());
+			nodes.union(grid[i][j].tileNumber(), grid[i][j+1].tileNumber());
 		}
 		}
 	}
 	
 	public boolean isFull(int row, int column)
 	{
-		int i=row-1, j=column-1;
-		return nodes.connected(grid[i][j].tileNumber(), 0);
+		int i = row-1, j = column-1;
+		if(grid[i][j].isOpen())
+			return nodes.connected(grid[i][j].tileNumber(), 0);
+		else
+			return false;
+		
 	}
 	
 	private void connectEnds()
 	{
-		for (int i=0; i<dim ; i++)
+		for (int i = 0; i < dim; i++)
 		{
-			nodes.union(0,grid[0][i].tileNumber());
-			nodes.union(dim*dim+1,grid[dim-1][i].tileNumber());
+			nodes.union(0, grid[0][i].tileNumber());
+			nodes.union(dim*dim+1, grid[dim-1][i].tileNumber());
 		}
 	}
-	
+
+	public static void main(String[] args)
+	{
+		Percolation perc = new Percolation(6);
+		//perc.open(1, 1);
+		System.out.print(perc.isFull(1,5));
+	}
 	
 }
 
