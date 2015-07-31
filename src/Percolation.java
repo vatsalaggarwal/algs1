@@ -30,9 +30,10 @@ public class Percolation {
 	
 	public boolean isFull(int row, int column)
 	{
-		row = rNum(row);
-		column = cNum(column);
-		return nodes.connected( gridNumber( rNum(row), cNum(column) ), 0 );
+		if (isOpen(row,column))
+			return nodes.connected( gridNumber( rNum(row), cNum(column) ), 0 );
+		else
+			return false;
 	}
 	
 	public boolean isOpen(int row, int column)
@@ -72,7 +73,7 @@ public class Percolation {
 					nodes2.union(gridNumber(row + 1, column), gridNumber(row, column));
 				}
 			if (column <= dim - 2)
-				if(isOpen(row - 1 + 1, column + 1))
+				if(isOpen(row + 1, column + 1 + 1))
 				{
 					nodes.union(gridNumber(row, column + 1), gridNumber(row, column));
 					nodes2.union(gridNumber(row, column + 1), gridNumber(row, column));
@@ -97,26 +98,13 @@ public class Percolation {
 	
 	public static void main(String[] args)
 	{
-		Percolation perc = new Percolation(6);
-		perc.open(1, 6);
-		perc.open(2, 6);
-		perc.open(3, 6);
-		perc.open(4, 6);
-		perc.open(5, 6);
-		perc.open(5, 5);
-		perc.open(4, 4);
-		perc.open(3, 4);
-		perc.open(2, 4);
-		perc.open(2, 3);
-		perc.open(2, 2);
-		perc.open(2, 1);
-		perc.open(3, 1);
-		perc.open(4, 1);
-		perc.open(5, 1);
-		perc.open(5, 2);
-		perc.open(6, 2);
-		//perc.open(5, 4);
-		System.out.print(perc.percolates());
+		Percolation[] perc = new Percolation[1];
+		perc[0] = new Percolation(6);
+		System.out.print(!perc[0].percolates());
+		while(!perc[0].percolates())
+		{
+			return;
+		}
 	}
 	
 }

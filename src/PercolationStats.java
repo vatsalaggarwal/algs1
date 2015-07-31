@@ -1,5 +1,5 @@
 public class PercolationStats {
-private Percolation[] perc;
+private static Percolation[] perc; // why does non-static method change memory usage?
 private int[] openSites; //array containing the number of OpenSites
 private int dim;
 
@@ -21,12 +21,12 @@ private int dim;
 	
 	public double mean()
 	{
-		return StdStats.mean(openSites);
+		return StdStats.mean(openSites)/(dim*dim);
 	}
 	
 	public double stddev()
 	{
-		return StdStats.stddev(openSites);
+		return StdStats.stddev(openSites)/(dim*dim*dim*dim);
 	}
 	
 	public double confidenceLo()
@@ -41,7 +41,7 @@ private int dim;
 	
 	public static void main(String[] args)
 	{
-		PercolationStats stats = new PercolationStats(Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+		PercolationStats stats = new PercolationStats(2,1000);
 		System.out.println("mean = " + stats.mean());
 		System.out.println("stddev = " + stats.stddev());
 		System.out.println("95% confidence interval = " + stats.confidenceLo() + ", " +stats.confidenceHi());
@@ -53,17 +53,21 @@ private int dim;
 		int randomRow, randomColumn; //probabilities multiply anyways
 		for (int i = 0; i < len; i++)
 		{
-		while(!perc[i].percolates())
-		{
-			randomRow = StdRandom.uniform(0, dim - 1);
-			randomColumn = StdRandom.uniform(0, dim - 1);
+			while(!perc[i].percolates())
+			{
+				
+			randomRow = StdRandom.uniform(1, dim + 1);
+			randomColumn = StdRandom.uniform(1, dim + 1);
 			if(!perc[i].isOpen(randomRow, randomColumn))
 			{
 				perc[i].open(randomRow, randomColumn);
 				openSites[i]++;
 			}
+			
+			}
 		}
-		}
+	
 	}
 	
 }
+	
