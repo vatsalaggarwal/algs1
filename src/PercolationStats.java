@@ -1,9 +1,7 @@
-//package Week1;
-
 public class PercolationStats {
 private Percolation[] perc;
-private int[] openSites;
-private int dim, noOfMaps;
+private int[] openSites; //array containing the number of OpenSites
+private int dim;
 
 	public PercolationStats(int N, int T)
 	{
@@ -11,9 +9,9 @@ private int dim, noOfMaps;
 			throw new java.lang.IllegalArgumentException();
 		
 		dim = N;
-		noOfMaps = T;
 		
 		perc = new Percolation[T];
+		openSites = new int[T];
 		for (int i = 0; i < T; i++)
 		{
 			perc[i] = new Percolation(N);
@@ -23,22 +21,22 @@ private int dim, noOfMaps;
 	
 	public double mean()
 	{
-		return 0;
+		return StdStats.mean(openSites);
 	}
 	
 	public double stddev()
 	{
-		return 0;
+		return StdStats.stddev(openSites);
 	}
 	
 	public double confidenceLo()
 	{
-		return 0;
+		return mean() - 1.96 * stddev() / Math.sqrt(perc.length);
 	}
 	
 	public double confidenceHi()
 	{
-		return 0;
+		return mean() + 1.96 * stddev() / Math.sqrt(perc.length);
 	}
 	
 	public static void main(String[] args)
@@ -60,9 +58,11 @@ private int dim, noOfMaps;
 			randomRow = StdRandom.uniform(0, dim - 1);
 			randomColumn = StdRandom.uniform(0, dim - 1);
 			if(!perc[i].isOpen(randomRow, randomColumn))
+			{
 				perc[i].open(randomRow, randomColumn);
+				openSites[i]++;
+			}
 		}
-	//	openSites = perc[i].noOfOpenSites();
 		}
 	}
 	

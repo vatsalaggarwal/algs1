@@ -1,142 +1,122 @@
 
-// is TileNumber needed?
-//is there a way to control arguments for all functions? How did I
-//add 1 to all?
 public class Percolation {
-	
-	private class Square
-	{
-		private boolean isOpen;
-		private int tileNumber, row, column;
-		public Square(int i, int j)
-		{
-			tileNumber = i+j*dim+1;
-			// makes it 1 2 3 4 5 6 7 8 column down, then 9 10 next column down etc
-			row=i;
-			column=j;
-		}
-		
-		public boolean isOpen()
-		{
-			return isOpen;
-		}
-		
-		public boolean leftEdge()
-		{
-			return row == 0;
-		}
-		
-		public boolean rightEdge()
-		{
-			return row == dim - 1;
-		}
-		
-		public boolean topEdge()
-		{
-			return column == 0;
-		}
-		
-		public boolean bottomEdge()
-		{
-			return column == dim - 1;
-		}
-		
-		
-		
-		public void setOpen()
-		{
-			isOpen = true;
-		}
-		
-		public int tileNumber()
-		{
-			return tileNumber;
-		}
-	}
-	private Square[][] grid;
-	private QuickUnionUF nodes;
-	private int dim;
 
+	private boolean[][] grid;
+//	private int[][] gridNumber;
+	private WeightedQuickUnionUF nodes, nodes2;
+	private int dim;
+	
 	public Percolation(int n)
 	{
-		grid = new Square[n][n];
+		if (n <= 0)
+			throw new java.lang.IllegalArgumentException();
 		dim = n;
-		
+		nodes = new WeightedQuickUnionUF(n*n+1);
+		nodes2 = new WeightedQuickUnionUF(n*n+2);
+		grid = new boolean[n][n];
+		// should i use gridnumber array? only if number of accesses are more than N^2?
 		for (int i = 0; i < n; i++)
-			for(int j = 0; j < n; j++)
-				grid[i][j] = new Square(i,j); 
-		
-		nodes = new QuickUnionUF(n*n+2);
-		connectEnds();
-		dim = n;
-	}
-
-	public boolean isOpen(int row, int column)
-	{
-		int i = row - 1, j = column - 1;
-		return grid[i][j].isOpen();
+		{
+			nodes.union(0, gridNumber(0,i));
+			nodes2.union(0, gridNumber(0,i));
+			nodes2.union(n*n+1, gridNumber(n-1,i));
+		}
 	}
 	
 	public boolean percolates()
 	{
-		return nodes.connected(0, dim*dim+1);
-	}
-
-	public void open(int row, int column)
-	{
-		int i = row - 1, j = column - 1;
-		if (!isOpen(i+1, j+1))
-		{
-		grid[i][j].setOpen();
-		if (!grid[i][j].leftEdge())
-		{
-			grid[i-1][j].setOpen();
-			nodes.union(grid[i][j].tileNumber(), grid[i-1][j].tileNumber());
-		}
-		if (!grid[i][j].rightEdge())
-		{
-			grid[i+1][j].setOpen();
-			nodes.union(grid[i][j].tileNumber(), grid[i+1][j].tileNumber());
-		}
-		if (!grid[i][j].topEdge())
-		{
-			grid[i][j-1].setOpen();
-			nodes.union(grid[i][j].tileNumber(), grid[i][j-1].tileNumber());
-		}
-		if (!grid[i][j].bottomEdge())
-		{
-			grid[i][j+1].setOpen();
-			nodes.union(grid[i][j].tileNumber(), grid[i][j+1].tileNumber());
-		}
-		}
+		return nodes2.connected(0, dim*dim+1);
 	}
 	
 	public boolean isFull(int row, int column)
 	{
-		int i = row-1, j = column-1;
-		if(grid[i][j].isOpen())
-			return nodes.connected(grid[i][j].tileNumber(), 0);
-		else
-			return false;
-		
+		row = rNum(row);
+		column = cNum(column);
+		return nodes.connected( gridNumber( rNum(row), cNum(column) ), 0 );
 	}
 	
-	private void connectEnds()
+	public boolean isOpen(int row, int column)
 	{
-		for (int i = 0; i < dim; i++)
+		return grid[rNum(row)][cNum(column)];
+	}
+	
+	private void setOpen(int row, int column)
+	{
+		grid[rNum(row)][cNum(column)] = true;
+	}
+	
+	public void open(int row, int column)
+	{
+		row = rNum(row);
+		column = cNum(column);
+		if (!isOpen(row + 1, column + 1))
 		{
-			nodes.union(0, grid[0][i].tileNumber());
-			nodes.union(dim*dim+1, grid[dim-1][i].tileNumber());
+			setOpen(row + 1,column + 1);
+			
+			if (row >= 1)
+				if(isOpen(row - 1 + 1, column + 1))
+				{
+					nodes.union(gridNumber(row - 1, column), gridNumber(row, column));
+					nodes2.union(gridNumber(row - 1, column), gridNumber(row, column));
+				}
+			if (column >= 1)
+				if(isOpen(row + 1, column - 1 + 1))
+				{
+					nodes.union(gridNumber(row, column - 1), gridNumber(row, column));
+					nodes2.union(gridNumber(row, column - 1), gridNumber(row, column));
+				}
+			if (row <= dim - 2)
+				if(isOpen(row + 1 + 1, column + 1))
+				{
+					nodes.union(gridNumber(row + 1, column), gridNumber(row, column));
+					nodes2.union(gridNumber(row + 1, column), gridNumber(row, column));
+				}
+			if (column <= dim - 2)
+				if(isOpen(row - 1 + 1, column + 1))
+				{
+					nodes.union(gridNumber(row, column + 1), gridNumber(row, column));
+					nodes2.union(gridNumber(row, column + 1), gridNumber(row, column));
+				}
 		}
 	}
-
+	
+	private int rNum(int row)
+	{
+		return row - 1;
+	}
+	
+	private int cNum(int column)
+	{
+		return column - 1;
+	}
+	
+	private int gridNumber(int row, int column)
+	{
+		return (row) + (column) * dim + 1;
+	}
+	
 	public static void main(String[] args)
 	{
 		Percolation perc = new Percolation(6);
-		//perc.open(1, 1);
-		System.out.print(perc.isFull(1,5));
+		perc.open(1, 6);
+		perc.open(2, 6);
+		perc.open(3, 6);
+		perc.open(4, 6);
+		perc.open(5, 6);
+		perc.open(5, 5);
+		perc.open(4, 4);
+		perc.open(3, 4);
+		perc.open(2, 4);
+		perc.open(2, 3);
+		perc.open(2, 2);
+		perc.open(2, 1);
+		perc.open(3, 1);
+		perc.open(4, 1);
+		perc.open(5, 1);
+		perc.open(5, 2);
+		perc.open(6, 2);
+		//perc.open(5, 4);
+		System.out.print(perc.percolates());
 	}
 	
 }
-
-
